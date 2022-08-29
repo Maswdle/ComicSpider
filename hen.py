@@ -18,12 +18,13 @@ class Spider:
     lastname = ".jpg"
     group_pages = 0
     __r_url = ""
-    information_dic_T = {
+    information_dic = {
         "name": "",
         "pages": 0,
         "language": ""
     }
-    #! 这个是模板
+
+    # ! 这个是模板
     def __init__(self, raw_url):
         self.__r_url = raw_url
 
@@ -55,14 +56,26 @@ class Spider:
         for i in tags:
             self.d_lst.append(i["href"])
 
-    def language_filter(self):
-        ...
+    def language_filter(self, language):
+        # todo 完善筛选
+        # * 即语言和标题的获取，下载函数的完善
+        for i in self.d_lst:
+            web = requests.get(url=i)
+            cont = web.content
+            soup = BeautifulSoup(cont, "lxml")
+            tag = soup.find("a", class_="name", rel="nofollow")
+            s_tags = soup.find_all("img", class_="lazy small-bg-load")
+            s_url = s_tags[0].attrs["data-src"]
+            s = re.search(r'/(.+).3', str(s_url)).group()[3]
+            a = str(tag.contents)
+            result = re.search(r'\d+', a)
+            self.information_dic["pages"] = int(result.group())
 
     def parse_url_d(self):
         for i in self.d_lst:
             cont = requests.get(i).content
 
-    def download(self):
+    def _download(self):
         """
         :f: 下载
         :return: None
