@@ -8,7 +8,9 @@
 @ Description：批量下载
 """
 
-import requests, re, os, sys
+import os
+import re
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -26,9 +28,9 @@ class Spider:
         "number": 0
     }
 
-    # ! 这个是模板
     def __init__(self, raw_url):
         self.__r_url = raw_url
+        self.__path = os.path.abspath(".")
 
     def _getpage_group(self, soup):
         tags = soup.find_all("li", class_="page-item")
@@ -58,8 +60,9 @@ class Spider:
         for i in tags:
             self.d_lst.append(i["href"])
 
-    def filter_and_download(self, language):
+    def filter_and_download(self, language, length):
         # * 即语言和标题的获取，
+        c = 0
         for i in self.d_lst:
             web = requests.get(url=i)
             cont = web.content
@@ -69,6 +72,10 @@ class Spider:
             lang = soup.find_all("a", class_="name", href=f"https://3hentai.net/language/{language}")
             if len(lang) == 0:  # 筛选语言
                 continue
+            else:
+                if c == length:
+                    return
+                c += 1
             # 其他
             tag = soup.find("a", class_="name", rel="nofollow")
             s_tags = soup.find_all("img", class_="lazy small-bg-load")
@@ -94,11 +101,13 @@ class Spider:
         :return: None
         s_number
         """
-        # todo 创建文件和修改工作目录有问题
+        os.makedirs(f"{self.__path}\\works", exist_ok=True)
+        os.chdir(f"{self.__path}\\works")
+        path: str = self.information_dic["title"]
+        path = path.replace("/", "-")
 
-        os.makedirs(f'{os.path.abspath(".")}\\works\\{self.information_dic["title"]}', exist_ok=True)
-        os.chdir(f'{os.path.abspath(".")}\\works\\{self.information_dic["title"]}')
-        # ! 上面这两句有问题
+        os.mkdir(path)  # todo 修改这一句
+        os.chdir(f"{self.__path}\\works\\{path}")
         rl = self.information_dic["pages"]
         self._out()
         for i in range(1, rl + 1):
@@ -110,6 +119,7 @@ class Spider:
                 f.close()
             print(f"{i}/{rl} OK")
         print("end")
+        os.chdir(f"{self.__path}\\works")
 
     def _out(self):
         print(f'title: {self.information_dic["title"]}')
@@ -120,5 +130,5 @@ class Spider:
 if __name__ == "__main__":
     s = Spider("https://3hentai.net/artists/yd")
     s.parse_url_group()
-    s.filter_and_download("chinese")
+    s.filter_and_download("chinese", 3)
     print(s.group_pages)
