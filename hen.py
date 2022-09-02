@@ -35,6 +35,8 @@ class Spider:
     def _getpage_group(self, soup):
         tags = soup.find_all("li", class_="page-item")
         self.group_pages = len(tags) - 1
+        if self.group_pages == -1:
+            self.group_pages = 1
         ...
 
     def _get_all_d(self):
@@ -60,7 +62,7 @@ class Spider:
         for i in tags:
             self.d_lst.append(i["href"])
 
-    def filter_and_download(self, language, length):
+    def filter_and_download(self, language, length = -1):
         # * 即语言和标题的获取，
         c = 0
         for i in self.d_lst:
@@ -69,7 +71,8 @@ class Spider:
             soup = BeautifulSoup(cont, "lxml")
             # * 语言和标题
             title = soup.find("title").string
-            lang = soup.find_all("a", class_="name", href=f"https://3hentai.net/language/{language}")
+            lang = soup.find_all(
+                "a", class_="name", href=f"https://3hentai.net/language/{language}")
             if len(lang) == 0:  # 筛选语言
                 continue
             else:
@@ -101,12 +104,13 @@ class Spider:
         :return: None
         s_number
         """
-        os.makedirs(f"{self.__path}\\works", exist_ok=True)
+        os.chdir(self.__path)
+        os.makedirs("works", exist_ok=True)
         os.chdir(f"{self.__path}\\works")
         path: str = self.information_dic["title"]
-        path = path.replace("/", "-")
-
-        os.mkdir(path)  # todo 修改这一句
+        path = path.replace("/", "-")  # 避免多层目录
+        path = path.replace(":", "-")
+        os.makedirs(path, exist_ok=True)  # todo 修改这一句
         os.chdir(f"{self.__path}\\works\\{path}")
         rl = self.information_dic["pages"]
         self._out()
@@ -128,7 +132,11 @@ class Spider:
 
 
 if __name__ == "__main__":
-    s = Spider("https://3hentai.net/artists/yd")
+    name = input("artist>>>")
+    times = int(input("times>>>"))
+    lang = input("language>>>")
+    s = Spider(f"https://3hentai.net/artists/{name}")
     s.parse_url_group()
-    s.filter_and_download("chinese", 3)
+    s.filter_and_download(lang, length=times)
     print(s.group_pages)
+    input("")

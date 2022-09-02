@@ -9,5 +9,8 @@
 """
 import os
 
-z = r'C:\\Users\\wondr\\PycharmProjects\\ComicSpider\\works\\(C92)[OrangeMaru(YD)]OrangeMaruSpecial02(FateGrandOrder)[Chinese][moyan個人漢化]-3Hentai'
-os.makedirs(z)
+path = 'C:\\Users\\wondr\\PycharmProjects\\ComicSpider\\works\\(C100) [OrangeMaru (YD)] OrangeMaru vol.12 (THE iDOLM@STER: Shiny Colors) [Chinese] [無邪気漢化組] - 3Hentai'
+print(path)
+path = path.replace(":","")
+os.makedirs(path, exist_ok=True)
+os.chdir(path)
